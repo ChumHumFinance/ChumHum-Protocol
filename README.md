@@ -267,6 +267,6 @@ Discussion
 
 For any concerns with the protocol, open an issue or visit us on [Telegram](https://t.me/chumhumprotocol) to discuss.
 
-For security concerns, please email [security@swipe.io](mailto:security@swipe.io).
+For security concerns, please email [hello@chumhum.finance](mailto:hello@chumhum.finance).
 
-_© Copyright 2020, Swipe Wallet
+_© Copyright 2021, ChumHum Finance
