@@ -1,6 +1,6 @@
 pragma solidity ^0.5.16;
 import "./SafeMath.sol";
-import "./IBEP20.sol";
+import "./IERC20.sol";
 
 contract BUMVaultAdminStorage {
     /**
@@ -26,10 +26,10 @@ contract BUMVaultAdminStorage {
 
 contract BUMVaultStorage is BUMVaultAdminStorage {
     /// @notice The CHUM TOKEN!
-    IBEP20 public chum;
+    IERC20 public chum;
 
     /// @notice The BUM TOKEN!
-    IBEP20 public bum;
+    IERC20 public bum;
 
     /// @notice Guard variable for re-entrancy checks
     bool internal _notEntered;

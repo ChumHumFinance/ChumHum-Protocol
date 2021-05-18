@@ -1,13 +1,13 @@
 pragma solidity ^0.5.16;
-import "./SafeBEP20.sol";
-import "./IBEP20.sol";
+import "./SafeERC20.sol";
+import "./IERC20.sol";
 import "./BUMVaultProxy.sol";
 import "./BUMVaultStorage.sol";
 import "./BUMVaultErrorReporter.sol";
 
 contract BUMVault is BUMVaultStorage {
     using SafeMath for uint256;
-    using SafeBEP20 for IBEP20;
+    using SafeERC20 for IERC20;
 
     /// @notice Event emitted when BUM deposit
     event Deposit(address indexed user, uint256 amount);
@@ -194,8 +194,8 @@ contract BUMVault is BUMVaultStorage {
     }
 
     function setChumHumInfo(address _chum, address _bum) public onlyAdmin {
-        chum = IBEP20(_chum);
-        bum = IBEP20(_bum);
+        chum = IERC20(_chum);
+        bum = IERC20(_bum);
 
         _notEntered = true;
     }

@@ -76,7 +76,7 @@ contract DAIInterestRateModelV2 is JumpRateModel {
      * @notice Resets the baseRate and multiplier per block based on the stability fee and Dai savings rate
      */
     function poke() public {
-        (uint duty, ) = jug.ilks("BNB-A");
+        (uint duty, ) = jug.ilks("MATIC-A");
         uint stabilityFeePerBlock = duty.add(jug.base()).sub(1e27).mul(1e18).div(1e27).mul(15);
 
         // We ensure the minimum borrow rate >= DSR / (1 - reserve factor)

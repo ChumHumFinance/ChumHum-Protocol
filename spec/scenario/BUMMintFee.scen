@@ -1,0 +1,42 @@
+
+Macro NewMintBUM mintBUMAmount mintAmount user=Geoff collateralPrice=1.0 closeFactor=0.9
+    PricedComptrollerWithBUMController closeFactor:0.9
+    BUMController SetTreasuryData Guardian Jared 1e14
+    NewCToken ZRX cZRX
+    PriceOracle SetPrice cZRX collateralPrice
+    Support cZRX collateralFactor:0.7
+    Comptroller SetBUMMintRate 7e3
+    SimpleMintBUM user mintBUMAmount mintAmount
+
+Macro SimpleMintBUM user mintBUMAmount mintAmount
+    Prep user mintAmount ZRX cZRX
+    Mint user mintAmount cZRX
+    EnterMarkets user cZRX
+    MintBUM user mintBUMAmount
+
+Test "BUM Mint Fee"
+    NewMintBUM mintBUMAmount:1e18 mintAmount:1.43e18
+    --
+    -- Verify that the borrow results in the correct state
+    Assert Equal (Comptroller MintedBUM Geoff) 1e18
+    Assert Equal (CToken cZRX UnderlyingBalance Geoff) 1.43e18
+    Assert Equal (BUM TokenBalance Geoff) 0.9999e18
+    Assert Equal (BUM TokenBalance Jared) 1e14
+
+Test "BUM Mint Treasury Guardian"
+    NewMintBUM mintBUMAmount:1e18 mintAmount:1.43e18
+    --
+    -- Verify that the borrow results in the correct state
+    BUMController SetTreasuryData Guardian Jared 1e14
+    From Guardian (BUMController SetTreasuryData Guardian Jared 1e14)
+    AllowFailures
+    From Jared (BUMController SetTreasuryData Guardian Jared 1e14)
+    Assert Failure UNAUTHORIZED SET_TREASURY_OWNER_CHECK "0"
+    From Jared (BUMController SetTreasuryData Jared Jared 1e14)
+    Assert Failure UNAUTHORIZED SET_TREASURY_OWNER_CHECK "0"
+
+Test "BUM Mint Treasury Percent Cap"
+    NewMintBUM mintBUMAmount:1e18 mintAmount:1.43e18
+    AllowFailures
+    BUMController SetTreasuryData Guardian Jared 2e18
+    Assert Revert "revert treasury percent cap overflow"

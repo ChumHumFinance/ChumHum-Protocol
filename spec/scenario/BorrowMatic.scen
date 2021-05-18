@@ -1,0 +1,49 @@
+
+Test "Borrow some MATIC enters MATIC and succeeds when MATIC not entered"
+    NewComptroller price:1.0
+    ListedCToken ZRX cZRX
+    ListedMATICToken cMATIC initialExchangeRate:0.005e9
+    SetCollateralFactor cZRX collateralFactor:0.5
+    SetCollateralFactor cMATIC collateralFactor:0.5
+    Donate cMATIC 0.003e18
+    Prep Geoff Some ZRX cZRX
+    Mint Geoff 1e18 cZRX
+    EnterMarkets Geoff cZRX
+    Expect Changes (MATICBalance Geoff) +0.001e18
+    BorrowMatic Geoff 0.001e18 cMATIC
+    Assert Equal (MATICBalance cMATIC) 0.002e18
+    Assert Equal (Comptroller Liquidity Geoff) 4.99e17
+    Assert Equal (Comptroller MembershipLength Geoff) (Exactly 2)
+    Assert True (Comptroller CheckMembership Geoff cMATIC)
+
+Test "Borrow some MATIC fails when no MATIC available"
+    NewComptroller price:1.0
+    ListedCToken ZRX cZRX
+    ListedMATICToken cMATIC initialExchangeRate:0.005e9
+    SetCollateralFactor cZRX collateralFactor:0.5
+    SetCollateralFactor cMATIC collateralFactor:0.5
+    Prep Geoff Some ZRX cZRX
+    Mint Geoff 100e18 cZRX
+    EnterMarkets Geoff cZRX cMATIC
+    AllowFailures
+    Invariant Static (CToken cZRX ExchangeRateStored)
+    Invariant Static (CToken cMATIC ExchangeRateStored)
+    Invariant Static (Comptroller Liquidity Geoff)
+    Invariant Static (MATICBalance Geoff)
+    BorrowMatic Geoff 1e18 cMATIC
+    Assert Failure TOKEN_INSUFFICIENT_CASH BORROW_CASH_NOT_ABUMLABLE
+
+Test "Borrow some MATIC from excess cash"
+    NewComptroller price:1.0
+    ListedCToken ZRX cZRX
+    ListedMATICToken cMATIC initialExchangeRate:0.005e9
+    SetCollateralFactor cZRX collateralFactor:0.5
+    SetCollateralFactor cMATIC collateralFactor:0.5
+    Donate cMATIC 0.003e18
+    Prep Geoff Some ZRX cZRX
+    Mint Geoff 1e18 cZRX
+    EnterMarkets Geoff cZRX cMATIC
+    Expect Changes (MATICBalance Geoff) +0.001e18
+    BorrowMatic Geoff 0.001e18 cMATIC
+    Assert Equal (MATICBalance cMATIC) 0.002e18
+    Assert Equal (Comptroller Liquidity Geoff) 4.99e17

@@ -1,0 +1,66 @@
+-- Mint Tests
+
+GasTest "Send Mint 1 cMATIC"
+    NewComptroller
+    ListedMATICTokenMinted cMATIC initialExchangeRate:0.005e9
+    Expect Changes (MATICBalance Geoff) -0.005e18
+    Expect Changes (CToken cMATIC UnderlyingBalance Geoff) +0.005e18
+    SendMintMatic Geoff 0.005e18 cMATIC
+    Assert Equal (Erc20 cMATIC TokenBalance Geoff) 10e8
+    Assert LastGas LessThan 1.2e5
+
+GasTest "Call Mint 1 cMATIC"
+    NewComptroller
+    ListedMATICTokenMinted cMATIC initialExchangeRate:0.005e9
+    Expect Changes (MATICBalance Geoff) -0.005e18
+    Expect Changes (CToken cMATIC UnderlyingBalance Geoff) +0.005e18
+    CallMintMatic Geoff 0.005e18 cMATIC
+    Assert Equal (Erc20 cMATIC TokenBalance Geoff) 10e8
+    Assert LastGas LessThan 1.2e5
+
+Test "Mint with insufficient matic balance"
+    NewComptroller
+    ListedMATICTokenMinted cMATIC initialExchangeRate:0.005e9
+    AllowFailures
+    Invariant Remains (CToken cMATIC UnderlyingBalance Geoff) 0e18
+    Invariant Remains (Erc20 cMATIC TokenBalance Geoff) 0e8
+    Invariant Static (MATICBalance Geoff)
+    CallMintMatic Geoff 1e30 cMATIC
+    Assert Error "sender doesn't have enough funds to send tx. The upfront cost is"
+
+Test "Mint two Matic after minting two Matic, and then I mint two more"
+    NewComptroller
+    ListedMATICToken cMATIC initialExchangeRate:0.005e9
+    Expect Changes (MATICBalance Geoff) -0.002e18
+    CallMintMatic Geoff 0.002e18 cMATIC
+    Assert Equal (Erc20 cMATIC TokenBalance Geoff) 4e8
+    Assert Equal (Erc20 cMATIC TotalSupply) 4e8
+    Expect Changes (MATICBalance Geoff) -0.002e18
+    SendMintMatic Geoff 0.002e18 cMATIC
+    Assert Equal (Erc20 cMATIC TokenBalance Geoff) 8e8
+    Assert Equal (Erc20 cMATIC TotalSupply) 8e8
+    Expect Changes (MATICBalance Geoff) -0.002e18
+    CallMintMatic Geoff 0.002e18 cMATIC
+    Assert Equal (Erc20 cMATIC TokenBalance Geoff) 12e8
+    Assert Equal (Erc20 cMATIC TotalSupply) 12e8
+
+Test "Two users Mint"
+    NewComptroller
+    ListedMATICToken cMATIC initialExchangeRate:0.005e9
+    CallMintMatic Geoff 0.002e18 cMATIC
+    Assert Equal (Erc20 cMATIC TokenBalance Geoff) 4e8
+    Assert Equal (Erc20 cMATIC TotalSupply) 4e8
+    CallMintMatic Torrey 0.004e18 cMATIC
+    Assert Equal (Erc20 cMATIC TokenBalance Geoff) 4e8
+    Assert Equal (Erc20 cMATIC TokenBalance Torrey) 8e8
+    Assert Equal (Erc20 cMATIC TotalSupply) 12e8
+
+Test "Mint accrues no interest without borrows"
+    NewComptroller
+    ListedMATICToken cMATIC initialExchangeRate:0.005e9
+    CallMintMatic Geoff 0.002e18 cMATIC
+    Assert Equal (Erc20 cMATIC TokenBalance Geoff) 4e8
+    Assert Equal (Erc20 cMATIC TotalSupply) 4e8
+    FastForward 1000 Blocks
+    Assert Equal (Erc20 cMATIC TokenBalance Geoff) 4e8
+    Assert Equal (Erc20 cMATIC TotalSupply) 4e8

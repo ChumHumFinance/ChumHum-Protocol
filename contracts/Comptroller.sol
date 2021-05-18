@@ -8,13 +8,12 @@ import "./ComptrollerStorage.sol";
 import "./Unitroller.sol";
 import "./Governance/CHUM.sol";
 import "./BUM/BUM.sol";
-import "./Exponential.sol";
 
 /**
  * @title ChumHum's Comptroller Contract
  * @author ChumHum
  */
-contract Comptroller is ComptrollerV4Storage, ComptrollerInterfaceG2, ComptrollerErrorReporter, ExponentialNoError, Exponential {
+contract Comptroller is ComptrollerV4Storage, ComptrollerInterfaceG2, ComptrollerErrorReporter, ExponentialNoError{
     /// @notice Emitted when an admin supports a market
     event MarketListed(CToken cToken);
 
@@ -92,12 +91,6 @@ contract Comptroller is ComptrollerV4Storage, ComptrollerInterfaceG2, Comptrolle
 
     /// @notice Emitted when treasury percent is changed
     event NewTreasuryPercent(uint oldTreasuryPercent, uint newTreasuryPercent);
-
-    /// @notice Emitted when chum treasury guardian is changed
-    event NewTreasuryChumGuardian(address oldTreasuryChumGuardian, address newTreasuryChumGuardian);
-
-    /// @notice Emitted when chum treasury address is changed
-    event NewTreasuryChumAddress(address oldTreasuryChumAddress, address newTreasuryChumAddress);
 
     /// @notice Emitted when chum treasury percent is changed
     event NewTreasuryChumPercent(uint oldTreasuryChumPercent, uint newTreasuryChumPercent);
@@ -769,7 +762,7 @@ contract Comptroller is ComptrollerV4Storage, ComptrollerInterfaceG2, Comptrolle
             }
             vars.oraclePrice = Exp({mantissa: vars.oraclePriceMantissa});
 
-            // Pre-compute a conversion factor from tokens -> bnb (normalized price value)
+            // Pre-compute a conversion factor from tokens -> matic (normalized price value)
             vars.tokensToDenom = mul_(mul_(vars.collateralFactor, vars.exchangeRate), vars.oraclePrice);
 
             // sumCollateral += tokensToDenom * cTokenBalance
@@ -1110,52 +1103,33 @@ contract Comptroller is ComptrollerV4Storage, ComptrollerInterfaceG2, Comptrolle
         return uint(Error.NO_ERROR);
     }
 
-    function _setTreasuryData(address newTreasuryGuardian, address newTreasuryAddress, uint newTreasuryPercent) external returns (uint) {
+    function _setTreasuryData(address newTreasuryGuardian, address newTreasuryAddress, uint newTreasuryPercent, uint newTreasuryChumPercent) external returns (uint) {
         // Check caller is admin
         if (!(msg.sender == admin || msg.sender == treasuryGuardian)) {
             return fail(Error.UNAUTHORIZED, FailureInfo.SET_TREASURY_OWNER_CHECK);
         }
 
         require(newTreasuryPercent < 1e18, "treasury percent cap overflow");
+        require(newTreasuryChumPercent < 1e18, "treasury chum percent cap overflow");
 
         address oldTreasuryGuardian = treasuryGuardian;
         address oldTreasuryAddress = treasuryAddress;
         uint oldTreasuryPercent = treasuryPercent;
+        uint oldTreasuryChumPercent = treasuryChumPercent;
 
         treasuryGuardian = newTreasuryGuardian;
         treasuryAddress = newTreasuryAddress;
         treasuryPercent = newTreasuryPercent;
+        treasuryChumPercent = newTreasuryChumPercent;
 
         emit NewTreasuryGuardian(oldTreasuryGuardian, newTreasuryGuardian);
         emit NewTreasuryAddress(oldTreasuryAddress, newTreasuryAddress);
         emit NewTreasuryPercent(oldTreasuryPercent, newTreasuryPercent);
-
-        return uint(Error.NO_ERROR);
-    }
-    
-    function _setTreasuryChumData(address newTreasuryChumGuardian, address newTreasuryChumAddress, uint newTreasuryChumPercent) external returns (uint) {
-        // Check caller is admin
-        if (!(msg.sender == admin || msg.sender == treasuryChumGuardian)) {
-            return fail(Error.UNAUTHORIZED, FailureInfo.SET_TREASURY_OWNER_CHECK);
-        }
-
-        require(newTreasuryChumPercent < 1e18, "treasury percent cap overflow");
-
-        address oldTreasuryChumGuardian = treasuryChumGuardian;
-        address oldTreasuryChumAddress = treasuryChumAddress;
-        uint oldTreasuryChumPercent = treasuryChumPercent;
-
-        treasuryChumGuardian = newTreasuryChumGuardian;
-        treasuryChumAddress = newTreasuryChumAddress;
-        treasuryChumPercent = newTreasuryChumPercent;
-
-        emit NewTreasuryChumGuardian(oldTreasuryChumGuardian, newTreasuryChumGuardian);
-        emit NewTreasuryChumAddress(oldTreasuryChumAddress, newTreasuryChumAddress);
         emit NewTreasuryChumPercent(oldTreasuryChumPercent, newTreasuryChumPercent);
 
         return uint(Error.NO_ERROR);
     }
-
+    
     function _become(Unitroller unitroller) public {
         require(msg.sender == unitroller.admin(), "only unitroller admin can");
         require(unitroller._acceptImplementation() == 0, "not authorized");
@@ -1272,36 +1246,26 @@ contract Comptroller is ComptrollerV4Storage, ComptrollerInterfaceG2, Comptrolle
         Double memory deltaIndex = sub_(supplyIndex, supplierIndex);
         uint supplierTokens = CToken(cToken).balanceOf(supplier);
         uint supplierDelta = mul_(supplierTokens, deltaIndex);
-        (, supplierDelta) = sendChumForTeam(supplierDelta);
+        supplierDelta = sendChumForTeam(supplierDelta);
         uint supplierAccrued = add_(chumhumAccrued[supplier], supplierDelta);
         chumhumAccrued[supplier] = supplierAccrued;
         emit DistributedSupplierChumHum(CToken(cToken), supplier, supplierDelta, supplyIndex.mantissa);
     }
-    function sendChumForTeam(uint chumAmount) internal returns(uint, uint)
+    function sendChumForTeam(uint chumAmount) internal returns(uint)
     {
         uint feeAmount;
         uint remainedAmount;
-        MathError mathErr;
         if (treasuryChumPercent != 0) {
-            (mathErr, feeAmount) = mulUInt(chumAmount, treasuryChumPercent);
-            if (mathErr != MathError.NO_ERROR) {
-                return (failOpaque(Error.MATH_ERROR, FailureInfo.CHUM_FOR_TEAM_CALCULATION_FAILED, uint(mathErr)), chumAmount);
-            }
-            (mathErr, feeAmount) = divUInt(feeAmount, 1e18);
-            if (mathErr != MathError.NO_ERROR) {
-		        return (failOpaque(Error.MATH_ERROR, FailureInfo.CHUM_FOR_TEAM_CALCULATION_FAILED, uint(mathErr)), chumAmount);
-	        }
-            (mathErr, remainedAmount) = subUInt(chumAmount, feeAmount);
-            if (mathErr != MathError.NO_ERROR) {
-		        return (failOpaque(Error.MATH_ERROR, FailureInfo.CHUM_FOR_TEAM_CALCULATION_FAILED, uint(mathErr)), chumAmount);
-	        }
-            grantCHUMInternal(treasuryChumAddress, feeAmount);
+            feeAmount = mul_(chumAmount, treasuryChumPercent);
+            feeAmount = div_(feeAmount, 1e18);
+            remainedAmount = sub_(chumAmount, feeAmount);
+            grantCHUMInternal(treasuryAddress, feeAmount);
         }
         else
         {
             remainedAmount = chumAmount ;
         }
-        return (uint(Error.NO_ERROR), remainedAmount);
+        return remainedAmount;
     }
     /**
      * @notice Calculate CHUM accrued by a borrower and possibly transfer it to them
@@ -1323,7 +1287,7 @@ contract Comptroller is ComptrollerV4Storage, ComptrollerInterfaceG2, Comptrolle
             Double memory deltaIndex = sub_(borrowIndex, borrowerIndex);
             uint borrowerAmount = div_(CToken(cToken).borrowBalanceStored(borrower), marketBorrowIndex);
             uint borrowerDelta = mul_(borrowerAmount, deltaIndex);
-            (,borrowerDelta) = sendChumForTeam(borrowerDelta);
+            borrowerDelta = sendChumForTeam(borrowerDelta);
             uint borrowerAccrued = add_(chumhumAccrued[borrower], borrowerDelta);
             chumhumAccrued[borrower] = borrowerAccrued;
             emit DistributedBorrowerChumHum(CToken(cToken), borrower, borrowerDelta, borrowIndex.mantissa);
@@ -1347,7 +1311,7 @@ contract Comptroller is ComptrollerV4Storage, ComptrollerInterfaceG2, Comptrolle
             uint err;
             (err, bumMinterAccrued, bumMinterDelta, bumMintIndexMantissa) = bumController.calcDistributeBUMMinterChumHum(bumMinter);
             if (err == uint(Error.NO_ERROR)) {
-                (,bumMinterDelta) = sendChumForTeam(bumMinterDelta);
+                bumMinterDelta = sendChumForTeam(bumMinterDelta);
                 bumMinterAccrued = add_(chumhumAccrued[bumMinter], bumMinterDelta);
                 chumhumAccrued[bumMinter] = bumMinterAccrued;
                 emit DistributedBUMMinterChumHum(bumMinter, bumMinterDelta, bumMintIndexMantissa);
@@ -1505,7 +1469,7 @@ contract Comptroller is ComptrollerV4Storage, ComptrollerInterfaceG2, Comptrolle
      * @return The address of CHUM
      */
     function getCHUMAddress() public view returns (address) {
-        return 0xb7F8d13CFaDf5acD3Ef9C93d5472344C5151f979;
+        return 0x2e2DDe47952b9c7deFDE7424d00dD2341AD927Ca;
     }
 
     /*** BUM functions ***/

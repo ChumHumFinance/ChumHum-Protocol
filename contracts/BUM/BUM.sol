@@ -29,7 +29,7 @@ contract BUM is LibNote {
         _;
     }
 
-    // --- BEP20 Data ---
+    // --- ERC20 Data ---
     string  public constant name     = "BUM Stablecoin";
     string  public constant symbol   = "BUM";
     string  public constant version  = "1";

@@ -1,13 +1,13 @@
 pragma solidity ^0.5.16;
 
-import "./CBep20Delegate.sol";
+import "./CErc20Delegate.sol";
 
 /**
  * @title ChumHum's CDai Contract
  * @notice CToken which wraps Multi-Collateral DAI
  * @author ChumHum
  */
-contract CDaiDelegate is CBep20Delegate {
+contract CDaiDelegate is CErc20Delegate {
     /**
      * @notice DAI adapter address
      */

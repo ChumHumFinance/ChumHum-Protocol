@@ -519,7 +519,7 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
 
         /*
          *  We call `doTransferIn` for the minter and the mintAmount.
-         *  Note: The cToken must handle variations between BEP-20 and BNB underlying.
+         *  Note: The cToken must handle variations between BEP-20 and MATIC underlying.
          *  `doTransferIn` reverts if anything goes wrong, since we can't be sure if
          *  side-effects occurred. The function returns the amount actually transferred,
          *  in case of a fee. On success, the cToken holds an additional `actualMintAmount`
@@ -686,7 +686,7 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
 
         /*
          * We invoke doTransferOut for the redeemer and the redeemAmount.
-         *  Note: The cToken must handle variations between BEP-20 and BNB underlying.
+         *  Note: The cToken must handle variations between BEP-20 and MATIC underlying.
          *  On success, the cToken has redeemAmount less of cash.
          *  doTransferOut reverts if anything goes wrong, since we can't be sure if side effects occurred.
          */
@@ -804,7 +804,7 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
 
         /*
          * We invoke doTransferOut for the borrower and the borrowAmount.
-         *  Note: The cToken must handle variations between BEP-20 and BNB underlying.
+         *  Note: The cToken must handle variations between BEP-20 and MATIC underlying.
          *  On success, the cToken borrowAmount less of cash.
          *  doTransferOut reverts if anything goes wrong, since we can't be sure if side effects occurred.
          */
@@ -909,7 +909,7 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
 
         /*
          * We call doTransferIn for the payer and the repayAmount
-         *  Note: The cToken must handle variations between BEP-20 and BNB underlying.
+         *  Note: The cToken must handle variations between BEP-20 and MATIC underlying.
          *  On success, the cToken holds an additional repayAmount of cash.
          *  doTransferIn reverts if anything goes wrong, since we can't be sure if side effects occurred.
          *   it returns the amount actually transferred, in case of a fee.
@@ -1277,7 +1277,7 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
 
         /*
          * We call doTransferIn for the caller and the addAmount
-         *  Note: The cToken must handle variations between BEP-20 and BNB underlying.
+         *  Note: The cToken must handle variations between BEP-20 and MATIC underlying.
          *  On success, the cToken holds an additional addAmount of cash.
          *  doTransferIn reverts if anything goes wrong, since we can't be sure if side effects occurred.
          *  it returns the amount actually transferred, in case of a fee.

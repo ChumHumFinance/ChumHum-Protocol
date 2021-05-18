@@ -504,7 +504,7 @@ contract BUMController is BUMControllerStorageG2, BUMControllerErrorReporter, Ex
      * @return The address of BUM
      */
     function getBUMAddress() public view returns (address) {
-        return 0xD9D574f06CE6aCc05E9816fd2d0C085157248acF;
+        return 0x53FEab56AaD08E47ED03aD4eb996E9709f9F7CFd;
     }
     function initialize() onlyAdmin public {
         // The counter starts true to prevent changing it from zero to non-zero (i.e. smaller cost/refund)

@@ -748,7 +748,7 @@ contract ComptrollerG1 is ComptrollerV1Storage, ComptrollerInterfaceG1, Comptrol
             }
             vars.oraclePrice = Exp({mantissa: vars.oraclePriceMantissa});
 
-            // Pre-compute a conversion factor from tokens -> bnb (normalized price value)
+            // Pre-compute a conversion factor from tokens -> matic (normalized price value)
             (mErr, vars.tokensToDenom) = mulExp3(vars.collateralFactor, vars.exchangeRate, vars.oraclePrice);
             if (mErr != MathError.NO_ERROR) {
                 return (Error.MATH_ERROR, 0, 0);
@@ -1466,7 +1466,7 @@ contract ComptrollerG1 is ComptrollerV1Storage, ComptrollerInterfaceG1, Comptrol
      * @return The address of CHUM
      */
     function getCHUMAddress() public view returns (address) {
-        return 0xb7F8d13CFaDf5acD3Ef9C93d5472344C5151f979;
+        return 0x2e2DDe47952b9c7deFDE7424d00dD2341AD927Ca;
     }
 
     /*** BUM functions ***/

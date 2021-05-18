@@ -1,0 +1,98 @@
+#!/usr/bin/env yarn run repl -s
+--deploy CHUM
+Gate (CHUM Address) (CHUM Deploy Geoff)
+--Gate (ChumHumLens Address) (ChumHumLens Deploy)
+--deploy BUM for testnet
+Gate (BUM Address) (BUM Deploy)
+--deploy BUM for mainnet
+--Gate (BUM Address) (BUM Deploy)
+
+--deploy timeloack and Governance
+Gate (TimeLock address) (Timelock Deploy Standard Geoff 172800)
+Governor Deploy Alpha GovernorAlpha (Address Timelock) (Address CHUM) Guardian
+
+--deploy Unitroller
+
+Gate (Unitroller Address) (Unitroller Deploy)
+
+-- Next a comptroller
+Gate (Comptroller Address) (Comptroller Deploy Comptroller)
+--Unitroller SetPendingImpl Comptroller
+--ComptrollerImpl Comptroller Become
+
+
+Gate (BUMUnitroller Address) (BUMUnitroller Deploy)
+Gate (BUMController Address) (BUMController Deploy BUMController)
+--BUMUnitroller SetPendingImpl BUMController
+--BUMControllerImpl BUMController Become
+--BUMController SetComptroller (Unitroller Address)
+
+--From Root (BUMUnitroller SetPendingAdmin (Timelock Address))
+
+Gate (ChumHumPriceOracle Address) (PriceOracle Deploy ChumHumPriceOracle)
+
+Gate (WhitePaperInterestRateModel Address) (InterestRateModel Deploy WhitePaper WhitePaperInterestRateModel 0.02 0.1)
+Gate (JumpRateModel Address) (InterestRateModel Deploy JumpRateModel JumpRateModel 0.05 0.2 2 0.90)
+
+
+Gate (CErc20Delegate address) (CTokenDelegate Deploy CErc20Delegate CErc20Delegate)
+
+-- Now deploy some BEP-20 faucet tokens
+Gate (Erc20 JulD Address) (Erc20 Deploy Standard JulD "JulSwap")
+Gate (Erc20 JULb Address) (Erc20 Deploy Standard JULb "JustLiquidity Token")
+Gate (Erc20 BUSD Address) (Erc20 Deploy Standard BUSD "Binance USD")
+Gate (Erc20 BTCB Address) (Erc20 Deploy Standard BTCB "Binance-Peg BTC")
+Gate (Erc20 ETHb Address) (Erc20 Deploy Standard ETHb "ETH on BSC")
+Gate (Erc20 USDT Address) (Erc20 Deploy Standard USDT "Binance USDT")
+
+--deploy cTokens
+Gate (CToken cMATIC Address) (CToken Deploy CMATIC cMATIC "ChumHum MATIC" (Comptroller Address) (InterestRateModel WhitePaperInterestRateModel Address) 0.2e9 8 Admin)
+Gate (CToken cJulD Address) (CToken Deploy CErc20Delegator cJulD "ChumHum JulD" (Erc20 JulD Address) (Comptroller Address) (InterestRateModel WhitePaperInterestRateModel Address) 0.2e9 8 Admin (CTokenDelegate CErc20Delegate Address) "0x0")
+CToken Deploy CErc20Delegator cCHUM "ChumHum CHUM" (Erc20 CHUM Address) (Comptroller Address) (InterestRateModel WhitePaperInterestRateModel Address) 0.2e9 8 Admin (CTokenDelegate CErc20Delegate Address) "0x0"
+CToken Deploy CErc20Delegator cJULb "ChumHum JULb" (Erc20 JULb Address) (Comptroller Address) (InterestRateModel WhitePaperInterestRateModel Address) 0.2e9 8 Admin (CTokenDelegate CErc20Delegate Address) "0x0"
+CToken Deploy CErc20Delegator cBTCB "ChumHum BTCB" (Erc20 BTCB Address) (Comptroller Address) (InterestRateModel WhitePaperInterestRateModel Address) 0.2e9 8 Admin (CTokenDelegate CErc20Delegate Address) "0x0"
+CToken Deploy CErc20Delegator cETHb "ChumHum ETHb" (Erc20 ETHb Address) (Comptroller Address) (InterestRateModel WhitePaperInterestRateModel Address) 0.2e9 8 Admin (CTokenDelegate CErc20Delegate Address) "0x0"
+
+CToken Deploy CErc20Delegator cUSDT "ChumHum USDT" (Erc20 USDT Address) (Comptroller Address) (InterestRateModel JumpRateModel Address) 2e-4 8 Admin (CTokenDelegate CErc20Delegate Address) "0x0"
+CToken Deploy CErc20Delegator cBUSD "ChumHum BUSD" (Erc20 BUSD Address) (Comptroller Address) (InterestRateModel JumpRateModel Address) 2e-4 8 Admin (CTokenDelegate CErc20Delegate Address) "0x0"
+
+CToken cJulD SetImplementation (CTokenDelegate CErc20Delegate Address) True "0x0"
+CToken cJULb SetImplementation (CTokenDelegate CErc20Delegate Address) True "0x0"
+CToken cCHUM SetImplementation (CTokenDelegate CErc20Delegate Address) True "0x0"
+CToken cBTCB SetImplementation (CTokenDelegate CErc20Delegate Address) True "0x0"
+CToken cETHb SetImplementation (CTokenDelegate CErc20Delegate Address) True "0x0"
+
+CToken cUSDT SetImplementation (CTokenDelegate CErc20Delegate Address) True "0x0"
+CToken cBUSD SetImplementation (CTokenDelegate CErc20Delegate Address) True "0x0"
+
+CToken cMATIC SetComptroller (Unitroller Address)
+CToken cUSDT SetComptroller (Unitroller Address)
+CToken cBUSD SetComptroller (Unitroller Address)
+CToken cCHUM SetComptroller (Unitroller Address)
+CToken cJULb SetComptroller (Unitroller Address)
+CToken cJulD SetComptroller (Unitroller Address)
+CToken cETHb SetComptroller (Unitroller Address)
+CToken cBTCB SetComptroller (Unitroller Address)
+
+
+Gate (Governor GovernorAlpha address) (Governor Deploy Alpha GovernorAlpha (Address Timelock) (Address CHUM) Guardian)
+
+-- Deploy Maximillion
+Gate (Maximillion Address) (Maximillion Deploy cMATIC)
+
+Gate (PriceOracleProxy address) (PriceOracleProxy Deploy Admin (PriceOracle Address) (Address cMATIC) (Address Zero) (Address Zero) (Address Zero) (Address Zero))
+Gate (BUMVaultProxy address) (BUMVaultProxy Deploy)
+
+--Comptroller setting
+    Comptroller SetCloseFactor 0.5
+    Comptroller LiquidationIncentive 1.1
+    --Comptroller SetChumHumRate 1e18
+    Comptroller SupportMarket cMATIC
+    Comptroller SupportMarket cUSDT
+    Comptroller SupportMarket cBUSD
+    Comptroller SupportMarket cJULb
+    Comptroller SupportMarket cJulD
+    Comptroller SupportMarket cCHUM
+    Comptroller SupportMarket cBTCB
+    Comptroller SupportMarket cETHb
+    Comptroller SetBorrowCapGuardian Geoff

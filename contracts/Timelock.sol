@@ -16,6 +16,10 @@ contract Timelock {
     uint public constant MINIMUM_DELAY = 2 days;
     uint public constant MAXIMUM_DELAY = 30 days;
 
+    // uint public constant GRACE_PERIOD = 14 days;
+    // uint public constant MINIMUM_DELAY = 1 hours;
+    // uint public constant MAXIMUM_DELAY = 30 days;
+
     address public admin;
     address public pendingAdmin;
     uint public delay;

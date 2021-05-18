@@ -178,12 +178,6 @@ contract ComptrollerV4Storage is ComptrollerV3Storage {
     /// @notice Fee percent of accrued interest with decimal 18
     uint256 public treasuryPercent;
 
-    /// @notice Treasury Guardian address
-    address public treasuryChumGuardian;
-
-    /// @notice Treasury address
-    address public treasuryChumAddress;
-
     /// @notice Fee percent of accrued interest with decimal 18
     uint256 public treasuryChumPercent;
 }

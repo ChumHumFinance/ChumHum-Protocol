@@ -57,7 +57,7 @@ contract CHUM is Tokenlock {
     uint8 public constant decimals = 18;
 
     /// @notice Total number of tokens in circulation
-    uint public constant totalSupply = 122500000e18; // 30 million CHUM
+    uint public constant totalSupply = 122500000e18; // 122.5 million CHUM
 
     /// @notice Allowance amounts on behalf of others
     mapping (address => mapping (address => uint96)) internal allowances;

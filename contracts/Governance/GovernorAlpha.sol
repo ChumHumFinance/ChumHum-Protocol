@@ -6,10 +6,10 @@ contract GovernorAlpha {
     string public constant name = "ChumHum Governor Alpha";
 
     /// @notice The number of votes in support of a proposal required in order for a quorum to be reached and for a vote to succeed
-    function quorumVotes() public pure returns (uint) { return 600000e18; } // 600,000 = 2% of CHUM
+    function quorumVotes() public pure returns (uint) { return 2000000e18; } // 2000,000 = 1.632% of CHUM
 
     /// @notice The number of votes required in order for a voter to become a proposer
-    function proposalThreshold() public pure returns (uint) { return 300000e18; } // 300,000 = 1% of CHUM
+    function proposalThreshold() public pure returns (uint) { return 1000000e18; } // 1000,000 = 0.816% of CHUM
 
     /// @notice The maximum number of actions that can be included in a proposal
     function proposalMaxOperations() public pure returns (uint) { return 10; } // 10 actions
@@ -18,7 +18,7 @@ contract GovernorAlpha {
     function votingDelay() public pure returns (uint) { return 1; } // 1 block
 
     /// @notice The duration of voting on a proposal, in blocks
-    function votingPeriod() public pure returns (uint) { return 60 * 60 * 24 * 3 / 3; } // ~3 days in blocks (assuming 3s blocks)
+    function votingPeriod() public pure returns (uint) { return 60 * 60 * 24 * 3 / 2; } // ~3 days in blocks (assuming 2s blocks)
 
     /// @notice The address of the ChumHum Protocol Timelock
     TimelockInterface public timelock;

@@ -1,6 +1,6 @@
 pragma solidity ^0.5.16;
 
-import "./CBep20Delegate.sol";
+import "./CErc20Delegate.sol";
 
 interface ChumLike {
   function delegate(address delegatee) external;
@@ -11,11 +11,11 @@ interface ChumLike {
  * @notice CTokens which can 'delegate votes' of their underlying BEP-20
  * @author ChumHum
  */
-contract VChumLikeDelegate is CBep20Delegate {
+contract VChumLikeDelegate is CErc20Delegate {
   /**
    * @notice Construct an empty delegate
    */
-  constructor() public CBep20Delegate() {}
+  constructor() public CErc20Delegate() {}
 
   /**
    * @notice Admin call to delegate the votes of the CHUM-like underlying

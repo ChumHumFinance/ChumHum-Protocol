@@ -245,14 +245,14 @@ contract CTokenInterface is CTokenStorage {
     function _setInterestRateModel(InterestRateModel newInterestRateModel) public returns (uint);
 }
 
-contract CBep20Storage {
+contract CErc20Storage {
     /**
      * @notice Underlying asset for this CToken
      */
     address public underlying;
 }
 
-contract CBep20Interface is CBep20Storage {
+contract CErc20Interface is CErc20Storage {
 
     /*** User Interface ***/
 

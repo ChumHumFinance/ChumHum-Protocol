@@ -1,6 +1,6 @@
 pragma solidity ^0.5.16;
 
-import "./CBep20.sol";
+import "./CErc20.sol";
 import "./CToken.sol";
 import "./PriceOracle.sol";
 
@@ -18,8 +18,8 @@ contract PriceOracleProxy is PriceOracle {
     /// @notice Address of the guardian, which may set the SAI price once
     address public guardian;
 
-    /// @notice Address of the cBnb contract, which has a constant price
-    address public cBnbAddress;
+    /// @notice Address of the cMatic contract, which has a constant price
+    address public cMaticAddress;
 
     /// @notice Address of the cUSDC contract, which we hand pick a key for
     address public cUsdcAddress;
@@ -45,7 +45,7 @@ contract PriceOracleProxy is PriceOracle {
     /**
      * @param guardian_ The address of the guardian, which may set the SAI price once
      * @param v1PriceOracle_ The address of the v1 price oracle, which will continue to operate and hold prices for collateral assets
-     * @param cBnbAddress_ The address of cBNB, which will return a constant 1e18, since all prices relative to bnb
+     * @param cMaticAddress_ The address of cMATIC, which will return a constant 1e18, since all prices relative to matic
      * @param cUsdcAddress_ The address of cUSDC, which will be read from a special oracle key
      * @param cSaiAddress_ The address of cSAI, which may be read directly from storage
      * @param cDaiAddress_ The address of cDAI, which will be read from a special oracle key
@@ -53,7 +53,7 @@ contract PriceOracleProxy is PriceOracle {
      */
     constructor(address guardian_,
                 address v1PriceOracle_,
-                address cBnbAddress_,
+                address cMaticAddress_,
                 address cUsdcAddress_,
                 address cSaiAddress_,
                 address cDaiAddress_,
@@ -61,7 +61,7 @@ contract PriceOracleProxy is PriceOracle {
         guardian = guardian_;
         v1PriceOracle = V1PriceOracleInterface(v1PriceOracle_);
 
-        cBnbAddress = cBnbAddress_;
+        cMaticAddress = cMaticAddress_;
         cUsdcAddress = cUsdcAddress_;
         cSaiAddress = cSaiAddress_;
         cDaiAddress = cDaiAddress_;
@@ -76,8 +76,8 @@ contract PriceOracleProxy is PriceOracle {
     function getUnderlyingPrice(CToken cToken) public view returns (uint) {
         address cTokenAddress = address(cToken);
 
-        if (cTokenAddress == cBnbAddress) {
-            // bnb always worth 1
+        if (cTokenAddress == cMaticAddress) {
+            // matic always worth 1
             return 1e18;
         }
 
@@ -95,7 +95,7 @@ contract PriceOracleProxy is PriceOracle {
         }
 
         // otherwise just read from v1 oracle
-        address underlying = CBep20(cTokenAddress).underlying();
+        address underlying = CErc20(cTokenAddress).underlying();
         return v1PriceOracle.assetPrices(underlying);
     }
 
@@ -106,7 +106,7 @@ contract PriceOracleProxy is PriceOracle {
     function setSaiPrice(uint price) public {
         require(msg.sender == guardian, "only guardian may set the SAI price");
         require(saiPrice == 0, "SAI price may only be set once");
-        require(price < 0.1e18, "SAI price must be < 0.1 BNB");
+        require(price < 0.1e18, "SAI price must be < 0.1 MATIC");
         saiPrice = price;
     }
 }

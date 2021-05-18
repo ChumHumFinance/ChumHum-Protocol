@@ -1,22 +1,22 @@
 pragma solidity ^0.5.16;
 
 import "./PriceOracle.sol";
-import "./CBep20.sol";
+import "./CErc20.sol";
 
 contract SimplePriceOracle is PriceOracle {
     mapping(address => uint) prices;
     event PricePosted(address asset, uint previousPriceMantissa, uint requestedPriceMantissa, uint newPriceMantissa);
 
     function getUnderlyingPrice(CToken cToken) public view returns (uint) {
-        if (compareStrings(cToken.symbol(), "cBNB")) {
+        if (compareStrings(cToken.symbol(), "cMATIC")) {
             return 1e18;
         } else {
-            return prices[address(CBep20(address(cToken)).underlying())];
+            return prices[address(CErc20(address(cToken)).underlying())];
         }
     }
 
     function setUnderlyingPrice(CToken cToken, uint underlyingPriceMantissa) public {
-        address asset = address(CBep20(address(cToken)).underlying());
+        address asset = address(CErc20(address(cToken)).underlying());
         emit PricePosted(asset, prices[asset], underlyingPriceMantissa, underlyingPriceMantissa);
         prices[asset] = underlyingPriceMantissa;
     }
